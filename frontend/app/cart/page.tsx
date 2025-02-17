@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Link from 'next/link';
-import { ShoppingBag, Trash2, ArrowLeft } from 'lucide-react';
-import { useCart } from '@/app/lib/cart';
-import { useRouter } from 'next/navigation';
+import React from "react";
+import Link from "next/link";
+import { ShoppingBag, Trash2, ArrowLeft } from "lucide-react";
+import { useCart } from "@/app/lib/cart";
+import { useRouter } from "next/navigation";
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, total, clearCart } = useCart();
@@ -12,60 +12,71 @@ export default function CartPage() {
 
   const handleCheckout = async () => {
     try {
-      const token = localStorage.getItem('token');
-      
+      const token = localStorage.getItem("token");
+
       if (!token) {
-        router.push('/login');
+        router.push("/login");
         return;
       }
 
-      // Decode the JWT token to get userId
-      const tokenData = JSON.parse(atob(token.split('.')[1]));
+     
+      const tokenData = JSON.parse(atob(token.split(".")[1]));
       const userId = tokenData.userId;
 
-      const response = await fetch('http://localhost:5000/api/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          userId: userId,
-          products: items.map(item => ({
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            quantity: 1
-          })),
-          total: items.reduce((sum, item) => sum + item.price, 0)
-        })
-      });
+      const response = await fetch(
+        "https://backendfullstack-6wsf.onrender.com/api/orders/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            userId: userId,
+            cartItems: items.map((item) => ({
+              productId: item.id,
+              quantity: item.quantity, 
+              price: item.price,
+            })),
+          }),
+        }
+      );
 
       if (response.ok) {
         clearCart();
-        alert('Order placed successfully!');
+        alert("Order placed successfully!");
       } else {
         const error = await response.json();
-        alert(error.message || 'Error creating order');
+        console.error("Error creating order:", error); 
+        alert(error.message || "Error creating order");
       }
     } catch (error) {
-      console.error('Checkout error:', error);
-      alert('Error processing checkout');
+      console.error("Checkout error:", error);
+      alert("Error processing checkout");
     }
   };
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b">
+      <header className="border-b shadow-md bg-gradient-to-r from-teal-500 to-blue-500 text-white">
         <div className="container mx-auto px-4 py-6 flex justify-between items-center">
-          <Link href="/" className="text-2xl font-bold">
+          <Link
+            href="/"
+            className="text-3xl font-extrabold text-white hover:text-primary transition-colors"
+          >
             EcoShop
           </Link>
           <nav className="flex items-center gap-6">
-            <Link href="/products" className="text-foreground">
+            <Link
+              href="/products"
+              className="text-white hover:text-primary transition-colors"
+            >
               Products
             </Link>
-            <Link href="/cart" className="relative">
+            <Link
+              href="/cart"
+              className="relative text-white hover:text-primary transition-colors"
+            >
               <ShoppingBag className="w-6 h-6" />
               {items.length > 0 && (
                 <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground w-5 h-5 rounded-full flex items-center justify-center text-xs">
@@ -166,7 +177,7 @@ export default function CartPage() {
                   <span>${total.toFixed(2)}</span>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={handleCheckout}
                 className="w-full bg-primary text-primary-foreground px-8 py-3 rounded-md"
               >
@@ -177,9 +188,68 @@ export default function CartPage() {
         )}
       </main>
 
-      <footer className="bg-muted mt-20 py-12">
-        <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>&copy; 2024 EcoShop. All rights reserved.</p>
+      <footer className="bg-gradient-to-r from-teal-400 to-blue-500 text-white py-16 mt-20">
+        <div className="container mx-auto px-6 text-center">
+          <h3 className="text-4xl font-semibold mb-6 animate__animated animate__fadeIn">
+            Stay Connected with Us
+          </h3>
+          <p className="text-xl mb-8 opacity-75 animate__animated animate__fadeIn animate__delay-1s">
+            Join our newsletter and get the latest updates on new arrivals,
+            discounts, and more!
+          </p>
+
+          <div className="flex justify-center gap-8 mb-8">
+            <a
+              href="#"
+              className="text-white hover:text-primary transition-all transform hover:scale-110"
+            >
+              <i className="fab fa-facebook-square text-3xl"></i>
+            </a>
+            <a
+              href="#"
+              className="text-white hover:text-primary transition-all transform hover:scale-110"
+            >
+              <i className="fab fa-twitter-square text-3xl"></i>
+            </a>
+            <a
+              href="#"
+              className="text-white hover:text-primary transition-all transform hover:scale-110"
+            >
+              <i className="fab fa-instagram text-3xl"></i>
+            </a>
+            <a
+              href="#"
+              className="text-white hover:text-primary transition-all transform hover:scale-110"
+            >
+              <i className="fab fa-youtube text-3xl"></i>
+            </a>
+          </div>
+
+          <div className="text-lg opacity-75 mb-6">
+            <p>&copy; 2024 EcoShop. All Rights Reserved.</p>
+            <p className="mt-2">
+              <Link href="/privacy-policy" className="hover:underline">
+                Privacy Policy
+              </Link>
+              &nbsp;|&nbsp;
+              <Link href="/terms-of-service" className="hover:underline">
+                Terms of Service
+              </Link>
+            </p>
+          </div>
+
+          <div className="text-sm opacity-50">
+            <p className="mb-4">
+              <Link href="/contact" className="hover:underline">
+                Contact Us
+              </Link>
+            </p>
+            <p>
+              <Link href="/about" className="hover:underline">
+                About Us
+              </Link>
+            </p>
+          </div>
         </div>
       </footer>
     </div>
